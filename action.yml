@@ -1,0 +1,60 @@
+# action.yml
+name: "Push to SK8s"
+description: "Push docker images to SK8s"
+inputs:
+  git-host-name:
+    description: "Host of the git repo"
+    default: ${{ secrets.GIT_URL }}
+    required: false
+  git-ssh-port:
+    description: "SSH port of the git host"
+    default: ${{ secrets.GIT_SSH_PORT }}
+    required: false
+  git-project:
+    description: "Git project"
+    default: ${{ secrets.GIT_PROJECT }}
+    required: false
+  git-repo-name:
+    description: "Name of the repo to clone"
+    required: true
+  replacement:
+    description: "New string to replace"
+    required: true
+  file-name:
+    description: "In which file to replace"
+    required: true
+  line-identificator:
+    description: "Line marker to look for"
+    required: true
+  tag:
+    description: "Tag name to use, no tagging if not provided"
+    required: true
+  branch-name:
+    description: "Branch name to use, no branching if not provided, incompatible with multi-app"
+    required: false
+  main-branch-name:
+    description: "Main branch name to use"
+    required: false
+  multi-app:
+    description: "Flag for solution consisting of more than one app, creates static branch, does not support tagging and PR, incompatible with branch-name"
+    required: false
+  multi-app-pr:
+    description: "Flag for creating a PR for a Multiapp, incompatible with branch-name"
+    required: false
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - --git-host-name ${{ inputs.git-host-name }}
+    - --git-ssh-port ${{ inputs.git-ssh-port }}
+    - --git-project ${{ inputs.git-project }}
+    - --git-repo-name ${{ inputs.git-repo-name }}
+    - --replacement ${{ inputs.replacement }}
+    - --file-name ${{ inputs.file-name }}
+    - --line-identificator ${{ inputs.line-identificator }}
+    - --tag ${{ inputs.tag }}
+    - --branch-name ${{ inputs.branch-name }}
+    - --main-branch-name ${{ inputs.main-branch-name }}
+    - --multi-app ${{ inputs.multi-app }}
+    - --multi-app-pr ${{ inputs.multi-app-pr }}
