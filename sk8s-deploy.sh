@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo "------ INPUT PARAMETERS ------"
+echo $@
+echo "------------------------------"
+
 GIT_REPO_NAME=""
 
 GIT_HOST=""
@@ -25,6 +29,9 @@ MULTI_APP=false
 MULTI_APP_PR_PARAM=false
 MULTI_APP_PR=false
 
+GIT_COMMITTER_NAME="SGKB GitHub Actions"
+GIT_COMMITTER_EMAIL="webdev@sgkb.ch"
+
 PULL_REQUEST_URL=""
 
 die() {
@@ -37,7 +44,7 @@ clone() {
   GIT_URL=ssh://git@${GIT_HOST}:${GIT_SSH_PORT}/${GIT_PROJECT}/${GIT_REPO_NAME}.git
   # don't forget to generate ssh keys in our code repo and publish public key to swisscom bitbucket
   echo "--------------------------------------------------"
-  echo "Cloning and updating ${GIT_URL}"
+  echo "Cloning and updating ${GIT_URL} ..."
   if ! git clone "${GIT_URL}" "${GIT_REPO_NAME}" && [ -d "${GIT_REPO_NAME}" ] ; then
     echo "folder ${GIT_REPO_NAME} already exists"
   fi
@@ -57,21 +64,21 @@ replace() {
 
 commitAndPush() {
   echo "--------------------------------------------------"
-  echo "Commit and push to git"
-  git commit -a --author="${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>" -m "Change ${LINE_IDENT} to ${REPLACEMENT}" --allow-empty || die "having problems committing"
+  echo "Commit and push to git ..."
+  git commit -a --author="SGKB GitHub Actions <webdev@sgkb.ch>" -m "ci: change ${LINE_IDENT} to ${REPLACEMENT} [NOTICKET]" --allow-empty || die "having problems committing"
   git push -u origin ${BRANCH_NAME} || die "having problems pushing"
 }
 
 tag() {
   echo "--------------------------------------------------"
-  echo "Taging ${GIT_REPO_NAME} with tag ${TAG}"
+  echo "Taging ${GIT_REPO_NAME} with tag ${TAG} ..."
   git tag ${TAG} ${BRANCH_NAME} || die "having problems tagging"
   git push --tags || die "having problems pushing tag"
 }
 
 branch() {
   echo "--------------------------------------------------"
-  echo "Branching ${BRANCH_NAME}"
+  echo "Branching ${BRANCH_NAME} ..."
   git fetch || die "having problems fetch ${BRANCH_NAME}"
   git checkout -b ${BRANCH_NAME} || die "having problems checkout ${BRANCH_NAME}"
   git pull origin ${BRANCH_NAME} || echo "INFO: Cannot pull ${BRANCH_NAME} - probably no remote branch available"

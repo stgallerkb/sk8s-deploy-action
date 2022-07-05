@@ -1,15 +1,15 @@
 # action.yml
 name: "Deploy to SK8s"
-description: "Deploy docker images to SK8s"
+description: "An action to conveniently deploy docker images to SK8s."
 branding:
   icon: "upload"
   color: "green"
 inputs:
   ssh-key:
-    description: "SSH Key"
+    description: "SSH key"
     required: true
   ssh-known-hosts:
-    description: "SSH Known Hosts"
+    description: "SSH known hosts"
     required: true
   git-host-name:
     description: "Host of the git repo"
@@ -30,7 +30,7 @@ inputs:
   file-name:
     description: "In which file to replace"
     default: "kustomization.yaml"
-    required: true
+    required: false
   line-identificator:
     description: "Line marker to look for"
     required: true
@@ -38,23 +38,25 @@ inputs:
     description: "Tag name to use, no tagging if not provided"
     required: true
   branch-name:
-    description: "Branch name to use, no branching if not provided, incompatible with multi-app"
+    description: "Branch name to use, no branching if not provided"
     required: false
   main-branch-name:
     description: "Main branch name to use"
-    required: false
-  multi-app:
-    description: "Flag for solution consisting of more than one app, creates static branch, does not support tagging and PR, incompatible with branch-name"
-    required: false
-  multi-app-pr:
-    description: "Flag for creating a PR for a Multiapp, incompatible with branch-name"
     required: false
 
 runs:
   using: "composite"
   steps:
+    - name: Use Action context
+      run: |
+        echo "Initial GitHub path is $GITHUB_PATH"
+        echo "Using action context ${{ github.action_path }}"
+        echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+
     - name: Add SSH key
       run: |
+        echo "Setting up SSH ..."
         mkdir -p /home/runner/.ssh
         echo ${{ inputs.ssh-known-hosts }} >> /home/runner/.ssh/known_hosts
         echo "${{ inputs.ssh-key }}" > /home/runner/.ssh/id_rsa
@@ -63,20 +65,23 @@ runs:
         # ssh-add /home/runner/.ssh/id_rsa
       shell: bash
 
+    - name: Setup Git account
+      run: |
+        git config --global user.name "SGKB GitHub Actions"
+        git config --global user.email "webdev@sgkb.ch"
+      shell: bash
+
     - name: Deploy Docker image to SK8s
       run: |
-        chmod +x sk8s-deploy.sh
-        ./sk8s-deploy.sh \
+        sk8s-deploy.sh \
         --git-host-name ${{ inputs.git-host-name }} \
         --git-ssh-port ${{ inputs.git-ssh-port }} \
         --git-project ${{ inputs.git-project }} \
         --git-repo-name ${{ inputs.git-repo-name }} \
         --replacement ${{ inputs.replacement }} \
         --file-name ${{ inputs.file-name }} \
-        --line-identificator ${{ inputs.line-identificator }}
+        --line-identificator ${{ inputs.line-identificator }} \
         --tag ${{ inputs.tag }} \
         --branch-name ${{ inputs.branch-name }} \
-        --main-branch-name ${{ inputs.main-branch-name }} \
-        --multi-app ${{ inputs.multi-app }} \
-        --multi-app-pr ${{ inputs.multi-app-pr }}
+        --main-branch-name ${{ inputs.main-branch-name }}
       shell: bash
