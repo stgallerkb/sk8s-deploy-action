@@ -1,7 +1,18 @@
 # action.yml
-name: "Push to SK8s"
-description: "Push docker images to SK8s"
+name: "Deploy to SK8s"
+description: "Deploy docker images to SK8s"
+branding:
+  icon: "upload"
+  color: "green"
 inputs:
+  ssh-key:
+    description: "BitBucket SSH Key"
+    default: ${{ secrets.SSH_KEY }}
+    required: true
+  ssh-known-hosts:
+    description: "BitBucket SSH Known Hosts"
+    default: ${{ secrets.KNOWN_HOSTS }}
+    required: true
   git-host-name:
     description: "Host of the git repo"
     default: ${{ secrets.GIT_URL }}
@@ -22,6 +33,7 @@ inputs:
     required: true
   file-name:
     description: "In which file to replace"
+    default: "kustomization.yaml"
     required: true
   line-identificator:
     description: "Line marker to look for"
@@ -43,18 +55,27 @@ inputs:
     required: false
 
 runs:
-  using: "docker"
-  image: "Dockerfile"
-  args:
-    - --git-host-name ${{ inputs.git-host-name }}
-    - --git-ssh-port ${{ inputs.git-ssh-port }}
-    - --git-project ${{ inputs.git-project }}
-    - --git-repo-name ${{ inputs.git-repo-name }}
-    - --replacement ${{ inputs.replacement }}
-    - --file-name ${{ inputs.file-name }}
-    - --line-identificator ${{ inputs.line-identificator }}
-    - --tag ${{ inputs.tag }}
-    - --branch-name ${{ inputs.branch-name }}
-    - --main-branch-name ${{ inputs.main-branch-name }}
-    - --multi-app ${{ inputs.multi-app }}
-    - --multi-app-pr ${{ inputs.multi-app-pr }}
+  using: "composite"
+  steps:
+    - name: Set up BitBucket SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ inputs.ssh-key }}
+        known_hosts: ${{ inputs.ssh-known-hosts }}
+        if_key_exists: fail
+
+    - name: Deploy Docker image to SK8s
+      run: sk8s-deploy.sh \
+        --git-host-name ${{ inputs.git-host-name }} \
+        --git-ssh-port ${{ inputs.git-ssh-port }} \
+        --git-project ${{ inputs.git-project }} \
+        --git-repo-name ${{ inputs.git-repo-name }} \
+        --replacement ${{ inputs.replacement }} \
+        --file-name ${{ inputs.file-name }} \
+        --line-identificator ${{ inputs.line-identificator }}
+        --tag ${{ inputs.tag }} \
+        --branch-name ${{ inputs.branch-name }} \
+        --main-branch-name ${{ inputs.main-branch-name }} \
+        --multi-app ${{ inputs.multi-app }} \
+        --multi-app-pr ${{ inputs.multi-app-pr }}
+      shell: shell
