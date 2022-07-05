@@ -64,7 +64,9 @@ runs:
       shell: bash
 
     - name: Deploy Docker image to SK8s
-      run: sk8s-deploy.sh \
+      run: |
+        chmod +x sk8s-deploy.sh
+        ./sk8s-deploy.sh \
         --git-host-name ${{ inputs.git-host-name }} \
         --git-ssh-port ${{ inputs.git-ssh-port }} \
         --git-project ${{ inputs.git-project }} \
