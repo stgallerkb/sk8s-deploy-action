@@ -95,28 +95,6 @@ generate_post_data()
   },
   "locked": false
   },
-  "reviewers": [
-    {
-      "user": {
-        "name": "ITSGK-sg1875"
-      }
-    },
-    {
-      "user": {
-        "name": "ITSGK-sg11867"
-      }
-    },
-    {
-      "user": {
-        "name": "TAASAAD5"
-      }
-    },
-    {
-      "user": {
-        "name": "TAAHEST0"
-      }
-    }
-  ]
 }
 EOF
 }

@@ -5,14 +5,6 @@ branding:
   icon: "upload"
   color: "green"
 inputs:
-  ssh-key:
-    description: "BitBucket SSH Key"
-    default: ${{ secrets.SSH_KEY }}
-    required: true
-  ssh-known-hosts:
-    description: "BitBucket SSH Known Hosts"
-    default: ${{ secrets.KNOWN_HOSTS }}
-    required: true
   git-host-name:
     description: "Host of the git repo"
     default: ${{ secrets.GIT_URL }}
@@ -57,12 +49,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up BitBucket SSH Key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ inputs.ssh-key }}
-        known_hosts: ${{ inputs.ssh-known-hosts }}
-        if_key_exists: fail
+    - name: Add SSH key
+      run: |
+        mkdir -p /home/runner/.ssh
+        echo ${{ secrets.SSH_KNOWN_HOSTS }} >> /home/runner/.ssh/known_hosts
+        echo "${{ secrets.SSH_KEY }}" > /home/runner/.ssh/id_rsa
+        chmod 600 /home/runner/.ssh/id_rsa
+        # ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
+        # ssh-add /home/runner/.ssh/id_rsa
+      shell: shell
 
     - name: Deploy Docker image to SK8s
       run: sk8s-deploy.sh \
