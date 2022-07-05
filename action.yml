@@ -5,18 +5,22 @@ branding:
   icon: "upload"
   color: "green"
 inputs:
+  ssh-key:
+    description: "SSH Key"
+    required: true
+  ssh-known-hosts:
+    description: "SSH Known Hosts"
+    required: true
   git-host-name:
     description: "Host of the git repo"
-    default: ${{ secrets.GIT_URL }}
-    required: false
+    required: true
   git-ssh-port:
     description: "SSH port of the git host"
-    default: ${{ secrets.GIT_SSH_PORT }}
+    default: "22"
     required: false
   git-project:
     description: "Git project"
-    default: ${{ secrets.GIT_PROJECT }}
-    required: false
+    required: true
   git-repo-name:
     description: "Name of the repo to clone"
     required: true
@@ -52,8 +56,8 @@ runs:
     - name: Add SSH key
       run: |
         mkdir -p /home/runner/.ssh
-        echo ${{ secrets.SSH_KNOWN_HOSTS }} >> /home/runner/.ssh/known_hosts
-        echo "${{ secrets.SSH_KEY }}" > /home/runner/.ssh/id_rsa
+        echo ${{ inputs.ssh-known-hosts }} >> /home/runner/.ssh/known_hosts
+        echo "${{ inputs.ssh-key }}" > /home/runner/.ssh/id_rsa
         chmod 600 /home/runner/.ssh/id_rsa
         # ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
         # ssh-add /home/runner/.ssh/id_rsa
