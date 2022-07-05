@@ -61,7 +61,7 @@ runs:
         chmod 600 /home/runner/.ssh/id_rsa
         # ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
         # ssh-add /home/runner/.ssh/id_rsa
-      shell: shell
+      shell: bash
 
     - name: Deploy Docker image to SK8s
       run: sk8s-deploy.sh \
@@ -77,4 +77,4 @@ runs:
         --main-branch-name ${{ inputs.main-branch-name }} \
         --multi-app ${{ inputs.multi-app }} \
         --multi-app-pr ${{ inputs.multi-app-pr }}
-      shell: shell
+      shell: bash
